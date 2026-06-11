@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVC Word Train Adventure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF5964;
+            --secondary: #35A7FF;
+            --accent: #38B000;
+            --yellow: #FFD166;
+            --background: #EAF6FF;
+            --text: #2B2D42;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--background);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 1024px;
+            height: 720px;
+            background: url('https://img.freepik.com/free-photo/fantasy-style-scene-with-mountains-landscape_23-2151124219.jpg?semt=ais_hybrid&w=740&q=80') no-repeat center;
+            background-size: cover;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 8px solid #FFF;
+        }
+
+        /* Screen States */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Common Typography & Buttons */
+        h1 {
+            font-size: 3.5rem;
+            color: #1A237E;
+            margin: 10px 0;
+            text-shadow: 3px 3px 0px #FFF;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: #1A237E;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(180deg, #FF7043 0%, #F4511E 100%);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #B93A14;
+            transition: transform 0.1s, box-shadow 0.1s;
+            margin: 10px;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #B93A14;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(180deg, #26A69A 0%, #00897B 100%);
+            box-shadow: 0 6px 0 #005B52;
+        }
+        .btn-secondary:active { box-shadow: 0 2px 0 #005B52; }
+
+        .btn-reset {
+            background: linear-gradient(180deg, #E53935 0%, #C62828 100%);
+            box-shadow: 0 6px 0 #8E1C1A;
+            font-size: 1.1rem;
+            padding: 10px 20px;
+        }
+        .btn-reset:active { box-shadow: 0 2px 0 #8E1C1A; }
+
+        /* Next Button Pulsing Animation for Kids */
+        @keyframes pulseNext {
+            0% { transform: scale(1); box-shadow: 0 6px 0 #005B52, 0 0 0 0 rgba(38, 166, 154, 0.7); }
+            50% { transform: scale(1.08); box-shadow: 0 6px 0 #005B52, 0 0 15px 10px rgba(38, 166, 154, 0); }
+            100% { transform: scale(1); box-shadow: 0 6px 0 #005B52, 0 0 0 0 rgba(38, 166, 154, 0); }
+        }
+
+        .btn-next-pulse {
+            background: linear-gradient(180deg, #26A69A 0%, #00897B 100%);
+            box-shadow: 0 6px 0 #005B52;
+            font-size: 1.8rem;
+            padding: 18px 45px;
+            animation: pulseNext 1.5s infinite ease-in-out;
+        }
+
+        /* Dashboard Styles */
+        .dashboard-panel {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            width: 80%;
+            max-width: 700px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .setting-row {
+            margin: 15px 0 25px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .setting-label {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #1A237E;
+        }
+
+        .select-custom {
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 15px;
+            border: 3px solid var(--secondary);
+            outline: none;
+            background: white;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .family-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .family-label {
+            background: #FFF;
+            border: 3px solid #BDBDBD;
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        .family-label input {
+            transform: scale(1.5);
+        }
+
+        .family-label.selected {
+            border-color: #4CAF50;
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        /* Top HUD Navbar */
+        .hud {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 10px 30px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .hud-item {
+            font-size: 1.4rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hud-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Scenery & Railroad Tracks */
+        .track-container {
+            position: absolute;
+            top: 210px;
+            width: 100%;
+            height: 190px;
+            display: flex;
+            align-items: center;
+        }
+
+        .railroad {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            height: 20px;
+            background: repeating-linear-gradient(90deg, #5D4037, #5D4037 15px, transparent 15px, transparent 40px);
+            border-top: 4px solid #795548;
+            border-bottom: 4px solid #795548;
+        }
+
+        /* Train Mechanics & Animations */
+        .train-engine-track {
+            position: absolute;
+            left: 110%; /* FIXED: Default starting point set offscreen right for consistent flow */
+            display: flex;
+            gap: 10px;
+            transition: left 1s cubic-bezier(0.25, 1, 0.5, 1);
+            width: auto;
+        }
+
+        .train-engine-track.center {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .train-engine-track.exit {
+            left: -100%; /* FIXED: Exit direction shifted left to match a continuous forward motion */
+            transform: translateX(0); /* Resets the center layout translate rules cleanly */
+        }
+
+        /* Cart/Coach Size Dimensions */
+        .coach {
+            width: 320px;
+            height: 200px;
+            background: #FFEB3B;
+            border: 5px solid #FBC02D;
+            border-radius: 15px 15px 5px 5px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 8px 0 rgba(255,255,255,0.5), 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        .coach::before, .coach::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            width: 35px;
+            height: 35px;
+            background: #37474F;
+            border-radius: 50%;
+            border: 4px solid #CFD8DC;
+        }
+        .coach::before { left: 40px; }
+        .coach::after { right: 40px; }
+
+        .coach-connector {
+            width: 30px;
+            height: 10px;
+            background: #78909C;
+            margin-top: 80px;
+        }
+
+        /* Image Inner Box Dimensions */
+        .picture-card {
+            width: 160px;
+            height: 140px;
+            background: white;
+            border-radius: 12px;
+            border: 4px solid #FF9800;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 5rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .picture-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        /* Slots Zone */
+        .slots-container {
+            margin-top: 230px;
+            display: flex;
+            gap: 20px;
+            z-index: 5;
+        }
+
+        .slot {
+            width: 110px;
+            height: 110px;
+            background: rgba(255,255,255,0.6);
+            border: 4px dashed #78909C;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: var(--text);
+            transition: all 0.2s;
+        }
+
+        .slot.glow-success {
+            border-color: #4CAF50;
+            background: #E8F5E9;
+            box-shadow: 0 0 20px #4CAF50;
+            border-style: solid;
+        }
+
+        /* Word Bank Mechanics */
+        .word-bank {
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 20px;
+            width: 85%;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+            z-index: 5;
+            min-height: 110px;
+        }
+
+        .tile {
+            width: 75px;
+            height: 75px;
+            background: white;
+            border: 4px solid var(--secondary);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.2rem;
+            font-weight: bold;
+            cursor: grab;
+            box-shadow: 0 5px 0 var(--secondary);
+            touch-action: none;
+            position: relative;
+        }
+
+        .tile:active {
+            cursor: grabbing;
+        }
+
+        .tile.rime-tile {
+            width: 105px;
+            border-color: #9C27B0;
+            box-shadow: 0 5px 0 #7B1FA2;
+        }
+
+        /* Position handling when dragged */
+        .tile.dragging {
+            opacity: 0.9;
+            z-index: 1000;
+            position: fixed !important;
+            pointer-events: none;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.25);
+            transform: scale(1.05);
+            transition: transform 0.05s linear;
+        }
+
+        /* Action Controls Layout */
+        .action-zone {
+            margin-top: 15px;
+            height: 80px;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            width: 100%;
+        }
+
+        /* Star Reward Burst Animation */
+        .star-reward {
+            position: absolute;
+            font-size: 6rem;
+            z-index: 40;
+            pointer-events: none;
+            display: none;
+            top: -120px;
+        }
+
+        @keyframes starBurst {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.6) rotate(180deg); opacity: 1; filter: drop-shadow(0 0 15px #FFD166); }
+            100% { transform: scale(1.2) rotate(360deg); opacity: 1; }
+        }
+
+        .star-active {
+            display: block !important;
+            animation: starBurst 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Animations */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .pop-effect {
+            animation: pop 0.3s ease-in-out;
+        }
+
+        /* Feedback Text Overlay */
+        .feedback-text {
+            position: absolute;
+            top: 15px;
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 0px #FFF;
+            display: none;
+            z-index: 20;
+        }
+        .feedback-text.correct { color: #2E7D32; }
+        .feedback-text.incorrect { color: #C62828; }
+
+        /* End/Win Summary Window */
+        .win-panel {
+            background: white;
+            padding: 40px;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            max-width: 550px;
+            width: 90%;
+        }
+
+        .stat-box {
+            font-size: 1.5rem;
+            margin: 15px 0;
+            background: #F5F5F5;
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+
+    <div id="screen-dashboard" class="screen active">
+        <div style="position: absolute; top: 15px; right: 20px;">
+            <button class="btn btn-secondary" style="margin:0; padding: 8px 20px; font-size: 1.1rem;" id="btn-dash-fullscreen">🖥️ Fullscreen</button>
+        </div>
+        <h1>🚂 CVC Word Train Adventure</h1>
+        <div class="dashboard-panel">
+            <h2>Teacher Dashboard</h2>
+            
+            <div class="setting-row">
+                <span class="setting-label">Number of Words to Form:</span>
+                <select id="select-word-limit" class="select-custom">
+                    <option value="5">5 Words</option>
+                    <option value="10">10 Words</option>
+                    <option value="15">15 Words</option>
+                    <option value="all" selected>All Words</option>
+                </select>
+            </div>
+
+            <p style="font-size: 1.2rem; color: #555; margin: 0;">Select Word Families to include in the session:</p>
+            
+            <div class="family-grid" id="dashboard-grid">
+                </div>
+
+            <div style="margin-top: 20px;">
+                <button class="btn" id="btn-play-selected">Play Selected Family</button>
+                <button class="btn btn-secondary" id="btn-play-all">Play All Families</button>
+            </div>
+            <div style="margin-top: 15px;">
+                <button class="btn btn-reset" id="btn-reset-score">Reset Score</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div class="hud">
+            <div class="hud-item">⭐ Score: <span id="hud-score">0</span></div>
+            <div class="hud-item">🚂 Completed: <span id="hud-completed">0</span></div>
+            <div class="hud-item">🏆 Progress: <span id="hud-progress">0%</span></div>
+            <div class="hud-controls">
+                <button class="btn btn-secondary" style="margin:0; padding: 5px 15px; font-size: 1rem; background: linear-gradient(180deg, #42A5F5 0%, #1E88E5 100%); box-shadow: 0 4px 0 #1565C0;" id="btn-game-fullscreen">🖥️ Fullscreen</button>
+                <button class="btn btn-reset" style="margin:0; padding: 5px 15px; font-size: 1rem; background: linear-gradient(180deg, #FFA726 0%, #FB8C00 100%); box-shadow: 0 4px 0 #EF6C00;" id="btn-quit">🏠 Home</button>
+            </div>
+        </div>
+
+        <div class="feedback-text" id="feedback-overlay">Excellent!</div>
+
+        <div class="track-container">
+            <div class="railroad"></div>
+            <div class="train-engine-track" id="train-track">
+                <div class="coach">
+                    <div class="picture-card" id="target-picture"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slots-container" id="slots-area">
+            <div class="slot" id="slot-onset" data-type="onset"></div>
+            <div class="slot" id="slot-rime" data-type="rime"></div>
+        </div>
+
+        <div class="word-bank" id="word-bank">
+            </div>
+
+        <div class="action-zone">
+            <div class="star-reward" id="star-reward-el">⭐</div>
+            <button class="btn btn-next-pulse" id="btn-next-coach" style="display: none;">Next Word ➡️</button>
+        </div>
+    </div>
+
+    <div id="screen-win" class="screen">
+        <div class="win-panel">
+            <h1 style="font-size: 3rem; margin-bottom: 5px;">🎉 Congratulations!</h1>
+            <p style="font-size: 1.4rem; font-weight:600; color: #4CAF50; margin-top:0;">You completed the Word Train Adventure!</p>
+            
+            <div style="margin: 25px 0;">
+                <div class="stat-box"><span>⭐ Total Score:</span><span id="stat-score">0</span></div>
+                <div class="stat-box"><span>🚂 Words Solved:</span><span id="stat-words">0</span></div>
+                <div class="stat-box"><span>🎯 Accuracy Percentage:</span><span id="stat-accuracy">100%</span></div>
+            </div>
+
+            <button class="btn" id="btn-win-again">Play Again</button>
+            <button class="btn btn-secondary" id="btn-win-setup">Choose Another Family</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- DATABASE CONFIGURATION WITH CUSTOM TARGET ILLUSTRATION LINKS ---
+    const WORD_FAMILIES = {
+        '-at': { 
+            rime: 'at', 
+            words: [ 
+                {w:'bat', e:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTW4F2EW11TBMQLD2q3Zla4676zbBFOXP3X9XHx9dsl0w&s=10'}, 
+                {w:'fat', e:'https://img.magnific.com/free-vector/overweight-man-cartoon-character_1308-134504.jpg?semt=ais_hybrid&w=740&q=80'}, 
+                {w:'hat', e:'https://cdn.creazilla.com/cliparts/3742006/cowboy-hat-clipart-original.png'} 
+            ], 
+            letters: ['b', 'f', 'h'] 
+        },
+        '-an': { 
+            rime: 'an', 
+            words: [ 
+                {w:'can', e:'https://media.istockphoto.com/id/2197379934/vector/canned-soup-vector-isolated-illustration.jpg?s=612x612&w=0&k=20&c=D2ksPpg1R48xNM4uAS5Yo08-jw0ve3t6U70hofJ-cAM='}, 
+                {w:'van', e:'https://img.magnific.com/premium-vector/isolated-cartoon-transportation-vehicle-retro-van-motion_1263357-22873.jpg?semt=ais_hybrid&w=740&q=80'}, 
+                {w:'ran', e:'https://thumbs.dreamstime.com/b/boy-ran-to-finish-line-first-vector-illustration-56314216.jpg'}, 
+                {w:'man', e:'https://img.magnific.com/free-vector/confident-businessman-green-tie_1308-174533.jpg?semt=ais_hybrid&w=740&q=80'}, 
+                {w:'pan', e:'https://img.magnific.com/premium-vector/frying-pan-clipart-cartoon-style-vector-illustration_761413-15541.jpg?semt=ais_hybrid&w=740&q=80'} 
+            ], 
+            letters: ['c', 'v', 'r', 'm', 'p'] 
+        },
+        '-en': { 
+            rime: 'en', 
+            words: [ 
+                {w:'men', e:'https://cdn.creazilla.com/cliparts/35741/business-men-talking-clipart-xl.png'}, 
+                {w:'hen', e:'https://img.magnific.com/free-vector/chicken-sitting-hay-sticker_1308-64183.jpg?semt=ais_hybrid&w=740&q=80'}, 
+                {w:'yen', e:'💴'}, 
+                {w:'ten', e:'🔟'} 
+            ], 
+            letters: ['m', 'h', 'y', 't'] 
+        },
+        '-ig': { 
+            rime: 'ig', 
+            words: [ 
+                {w:'big', e:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQt3ZzqIbiFl7GPHAPucNL7Ek8fUX8nLZlbqUraOIaNPw&s=10'}, 
+                {w:'fig', e:'https://png.pngtree.com/png-clipart/20240327/original/pngtree-watercolor-fig-fruit-clip-art-png-image_14687726.png'}, 
+                {w:'dig', e:'https://static.vecteezy.com/system/resources/thumbnails/001/307/915/small/cute-little-boy-digging-hole-cartoon.jpg'}, 
+                {w:'wig', e:'https://www.shutterstock.com/image-vector/blonde-wig-on-mannequin-isolated-600nw-2604998079.jpg'} 
+            ], 
+            letters: ['b', 'f', 'd', 'w'] 
+        },
+        '-ip': { 
+            rime: 'ip', 
+            words: [ 
+                {w:'lip', e:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0uvjPcuhwTgW1BbCz53J0tE9umR7otEYAkcpXiS3yk6LNNo_3o8-CLI4&s=10'}, 
+                {w:'zip', e:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQa0KoKHnXRMmPsFz-Tn8Ck_69qRmCC4NxpR7T9v6wMyIsea5uR3R4wTac&s=10'}, 
+                {w:'sip', e:'https://clipart-library.com/img/1795251.jpg'} 
+            ], 
+            letters: ['l', 'z', 's'] 
+        },
+        '-ot': { 
+            rime: 'ot', 
+            words: [ 
+                {w:'cot', e:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRf7UKN3cQIAxyaNi8HNgRtLy9HZXL7jNKbD0c3H1ZKWojUFNLGKimkL6A&s=10'}, 
+                {w:'dot', e:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ80-W9FoHx6sbdlN-fifFvdv7XYVHg4AOSxxtmf8DmdQ&s=10'}, 
+                {w:'not', e:'🚫'}, 
+                {w:'hot', e:'https://img2.clipart-library.com/28/free-clip-art-hot/free-clip-art-hot-11.jpg'}, 
+                {w:'pot', e:'https://img.freepik.com/premium-vector/cooking-pot-clipart-vector-kitchen-themed-culinary-design-projects_1280610-4769.jpg'} 
+            ], 
+            letters: ['c', 'd', 'n', 'h', 'p'] 
+        },
+        '-ug': { 
+            rime: 'ug', 
+            words: [ 
+                {w:'bug', e:'https://png.pngtree.com/png-clipart/20240305/original/pngtree-illustration-of-a-cartoon-bug-png-image_14513976.png'}, 
+                {w:'hug', e:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFDggLGLp6zYOVlsA_l0ylxk4j0snkPqGTH1TBFyXFe1lVkpWS863qiXA&s=10'}, 
+                {w:'jug', e:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR92_khyMP7hdURhcyKCQ4tw--IQ6km0b-FoSQ2D_UPKImc5IynJw-TtKI&s=10'}, 
+                {w:'mug', e:'https://img.magnific.com/premium-vector/vector-illustration-colorful-mug-white-background_1217597-2976.jpg?semt=ais_hybrid&w=740&q=80'}, 
+                {w:'rug', e:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5_9jUGN6gEbW0Q96l4pafgQN_CYn88JSvirFeygn7Pw&s=10'} 
+            ], 
+            letters: ['b', 'h', 'j', 'm', 'r'] 
+        }
+    };
+
+    // --- GAME ENGINE STATE ---
+    let state = {
+        score: 0,
+        completedCount: 0,
+        totalAttempts: 0,
+        wrongAttempts: 0,
+        activePool: [],      
+        currentWordIndex: 0,
+        selectedFamilies: ['-at'] 
+    };
+
+    // --- WEB AUDIO API SYNTHESIZER & AMBIENT MUSIC ENGINE ---
+    const AudioEngine = {
+        ctx: null,
+        bgm: null,
+        init() {
+            if (!this.ctx) {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume();
+            }
+            if (!this.bgm) {
+                this.bgm = new Audio('https://files.catbox.moe/7qzdx4.mp3');
+                this.bgm.loop = true;
+                this.bgm.volume = 0.12; 
+            }
+        },
+        playBGM() {
+            this.init();
+            if (this.bgm && this.bgm.paused) {
+                this.bgm.play().catch(err => console.log("Audio unlock error:", err));
+            }
+        },
+        playDing() {
+            this.init();
+            let osc = this.ctx.createOscillator();
+            let gain = this.ctx.createGain();
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(587.33, this.ctx.currentTime); 
+            osc.frequency.setValueAtTime(880, this.ctx.currentTime + 0.1);  
+            gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.4);
+        },
+        playStarChime() {
+            this.init();
+            const now = this.ctx.currentTime;
+            const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51]; 
+            notes.forEach((freq, index) => {
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + (index * 0.06));
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                gain.gain.setValueAtTime(0.2, now + (index * 0.06));
+                gain.gain.exponentialRampToValueAtTime(0.01, now + (index * 0.06) + 0.4);
+                osc.start(now + (index * 0.06));
+                osc.stop(now + (index * 0.06) + 0.4);
+            });
+        },
+        playError() {
+            this.init();
+            let osc = this.ctx.createOscillator();
+            let gain = this.ctx.createGain();
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(130, this.ctx.currentTime); 
+            gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.3);
+        }
+    };
+
+    // --- INITIALIZATION & DOM SELECTION ---
+    document.addEventListener("DOMContentLoaded", () => {
+        buildDashboardGrid();
+        setupEventListeners();
+        loadSavedScore();
+    });
+
+    function buildDashboardGrid() {
+        const grid = document.getElementById('dashboard-grid');
+        grid.innerHTML = '';
+        Object.keys(WORD_FAMILIES).forEach(key => {
+            const isChecked = state.selectedFamilies.includes(key) ? 'checked' : '';
+            const isSelClass = isChecked ? 'selected' : '';
+            grid.innerHTML += `
+                <label class="family-label ${isSelClass}" id="lbl-${key}">
+                    <input type="checkbox" value="${key}" ${isChecked} onchange="toggleFamilySelection('${key}')">
+                    ${key}
+                </label>
+            `;
+        });
+    }
+
+    window.toggleFamilySelection = function(key) {
+        const label = document.getElementById(`lbl-${key}`);
+        const checkbox = label.querySelector('input');
+        if (checkbox.checked) {
+            label.classList.add('selected');
+            if (!state.selectedFamilies.includes(key)) state.selectedFamilies.push(key);
+        } else {
+            label.classList.remove('selected');
+            state.selectedFamilies = state.selectedFamilies.filter(f => f !== key);
+        }
+    };
+
+    function setupEventListeners() {
+        document.getElementById('btn-play-selected').addEventListener('click', () => { startSession(false); });
+        document.getElementById('btn-play-all').addEventListener('click', () => { startSession(true); });
+        document.getElementById('btn-reset-score').addEventListener('click', resetScoreGlobal);
+        document.getElementById('btn-next-coach').addEventListener('click', advanceNextCoach);
+        document.getElementById('btn-quit').addEventListener('click', () => showScreen('screen-dashboard'));
+        document.getElementById('btn-win-again').addEventListener('click', restartCurrentSession);
+        document.getElementById('btn-win-setup').addEventListener('click', () => showScreen('screen-dashboard'));
+        
+        document.getElementById('btn-dash-fullscreen').addEventListener('click', toggleFullscreenMode);
+        document.getElementById('btn-game-fullscreen').addEventListener('click', toggleFullscreenMode);
+    }
+
+    function toggleFullscreenMode() {
+        const target = document.getElementById('game-container');
+        if (!document.fullscreenElement) {
+            target.requestFullscreen().catch(err => {
+                console.log(`Fullscreen error: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    // --- SCORE PERSISTENCE ---
+    function loadSavedScore() {
+        const saved = localStorage.getItem('cvc_train_score');
+        if (saved) {
+            state.score = parseInt(saved, 10);
+            updateHUD();
+        }
+    }
+
+    function resetScoreGlobal() {
+        state.score = 0;
+        state.completedCount = 0;
+        localStorage.setItem('cvc_train_score', 0);
+        updateHUD();
+        alert("Scores have been completely reset!");
+    }
+
+    // --- GAMEPLAY LIFECYCLE MANAGEMENT ---
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function startSession(allFamilies = false) {
+        let selected = allFamilies ? Object.keys(WORD_FAMILIES) : state.selectedFamilies;
+        if (selected.length === 0) {
+            alert("Please pick at least one word family to begin!");
+            return;
+        }
+
+        let fullPool = [];
+        selected.forEach(famKey => {
+            const structure = WORD_FAMILIES[famKey];
+            structure.words.forEach(wordObj => {
+                fullPool.push({
+                    word: wordObj.w,
+                    emoji: wordObj.e,
+                    rime: structure.rime,
+                    onset: wordObj.w.replace(structure.rime, ''),
+                    allLetters: structure.letters
+                });
+            });
+        });
+
+        // Shuffle Track
+        for (let i = fullPool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [fullPool[i], fullPool[j]] = [fullPool[j], fullPool[i]];
+        }
+
+        // Apply Word Cap Limit
+        const limitVal = document.getElementById('select-word-limit').value;
+        if (limitVal !== 'all') {
+            const limitAmt = parseInt(limitVal, 10);
+            state.activePool = fullPool.slice(0, limitAmt);
+        } else {
+            state.activePool = fullPool;
+        }
+
+        state.currentWordIndex = 0;
+        state.totalAttempts = 0;
+        state.wrongAttempts = 0;
+        
+        updateHUD();
+        showScreen('screen-game');
+        loadCurrentTargetWord();
+    }
+
+    function restartCurrentSession() {
+        state.currentWordIndex = 0;
+        state.totalAttempts = 0;
+        state.wrongAttempts = 0;
+        
+        for (let i = state.activePool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [state.activePool[i], state.activePool[j]] = [state.activePool[j], state.activePool[i]];
+        }
+        updateHUD();
+        showScreen('screen-game');
+        loadCurrentTargetWord();
+    }
+
+    // --- GAMEPLAY SLIDE ASSEMBLY & DRAW ---
+    let currentTarget = null;
+    let slotAnswers = { onset: false, rime: false };
+
+    function loadCurrentTargetWord() {
+        currentTarget = state.activePool[state.currentWordIndex];
+        slotAnswers = { onset: false, rime: false };
+
+        const sOnset = document.getElementById('slot-onset');
+        const sRime = document.getElementById('slot-rime');
+        sOnset.innerHTML = '';
+        sRime.innerHTML = '';
+        sOnset.classList.remove('glow-success');
+        sRime.classList.remove('glow-success');
+
+        const picContainer = document.getElementById('target-picture');
+        if (currentTarget.emoji.startsWith('http')) {
+            picContainer.innerHTML = `<img src="${currentTarget.emoji}" alt="${currentTarget.word}">`;
+        } else {
+            picContainer.innerHTML = currentTarget.emoji;
+        }
+
+        document.getElementById('btn-next-coach').style.display = 'none';
+        document.getElementById('star-reward-el').classList.remove('star-active');
+
+        // FIXED: Transition rules disabled safely during positioning swap to eliminate visual backwards slides
+        const track = document.getElementById('train-track');
+        track.style.transition = 'none';
+        track.className = 'train-engine-track'; 
+        track.offsetWidth; 
+        track.style.transition = '';
+        track.classList.add('center');
+
+        buildWordBankTiles();
+    }
+
+    function buildWordBankTiles() {
+        const bank = document.getElementById('word-bank');
+        bank.innerHTML = '';
+
+        let tilesData = [];
+        currentTarget.allLetters.forEach(l => {
+            tilesData.push({ val: l, type: 'onset' });
+        });
+        tilesData.push({ val: currentTarget.rime, type: 'rime' });
+
+        tilesData.sort(() => Math.random() - 0.5);
+
+        tilesData.forEach((tile, index) => {
+            const tileEl = document.createElement('div');
+            tileEl.classList.add('tile');
+            if (tile.type === 'rime') tileEl.classList.add('rime-tile');
+            tileEl.innerText = tile.val;
+            tileEl.dataset.value = tile.val;
+            tileEl.dataset.type = tile.type;
+            tileEl.id = `tile-${index}`;
+
+            setupDragAndDropMechanic(tileEl);
+            bank.appendChild(tileEl);
+        });
+    }
+
+    function updateHUD() {
+        document.getElementById('hud-score').innerText = state.score;
+        document.getElementById('hud-completed').innerText = state.completedCount;
+        
+        let percent = 0;
+        if (state.activePool.length > 0) {
+            percent = Math.round((state.currentWordIndex / state.activePool.length) * 100);
+        }
+        document.getElementById('hud-progress').innerText = `${percent}%`;
+    }
+
+    // --- ROBUST UN-SNAPPED POINTER TRACKING SYSTEM ---
+    function setupDragAndDropMechanic(tileEl) {
+        let isDragging = false;
+
+        tileEl.addEventListener('pointerdown', onPointerDown);
+
+        function onPointerDown(e) {
+            AudioEngine.playBGM(); 
+            
+            e.preventDefault();
+            isDragging = true;
+            tileEl.setPointerCapture(e.pointerId);
+
+            const rect = tileEl.getBoundingClientRect();
+            tileEl.dataset.offsetX = e.clientX - rect.left;
+            tileEl.dataset.offsetY = e.clientY - rect.top;
+
+            tileEl.classList.add('dragging');
+            tileEl.style.left = `${rect.left}px`;
+            tileEl.style.top = `${rect.top}px`;
+
+            tileEl.addEventListener('pointermove', onPointerMove);
+            tileEl.addEventListener('pointerup', onPointerUp);
+            tileEl.addEventListener('pointercancel', onPointerUp);
+        }
+
+        function onPointerMove(e) {
+            if (!isDragging) return;
+            const offsetX = parseFloat(tileEl.dataset.offsetX);
+            const offsetY = parseFloat(tileEl.dataset.offsetY);
+            tileEl.style.left = `${e.clientX - offsetX}px`;
+            tileEl.style.top = `${e.clientY - offsetY}px`;
+        }
+
+        function onPointerUp(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            tileEl.releasePointerCapture(e.pointerId);
+            tileEl.removeEventListener('pointermove', onPointerMove);
+            tileEl.removeEventListener('pointerup', onPointerUp);
+            tileEl.removeEventListener('pointercancel', onPointerUp);
+
+            const type = tileEl.dataset.type;
+            const value = tileEl.dataset.value;
+            const targetSlotId = type === 'onset' ? 'slot-onset' : 'slot-rime';
+            const slotEl = document.getElementById(targetSlotId);
+            const slotRect = slotEl.getBoundingClientRect();
+
+            tileEl.classList.remove('dragging');
+            tileEl.style.position = '';
+            tileEl.style.left = '';
+            tileEl.style.top = '';
+
+            if (e.clientX >= slotRect.left && e.clientX <= slotRect.right &&
+                e.clientY >= slotRect.top && e.clientY <= slotRect.bottom) {
+                validatePlacement(type, value, tileEl);
+            } else {
+                tileEl.classList.add('pop-effect');
+                setTimeout(() => tileEl.classList.remove('pop-effect'), 300);
+            }
+        }
+    }
+
+    // --- RUNTIME EVALUATION & SCORING VALIDATION ---
+    function validatePlacement(type, value, tileEl) {
+        state.totalAttempts++;
+        let isCorrect = false;
+
+        if (type === 'onset' && value === currentTarget.onset) {
+            isCorrect = true;
+        } else if (type === 'rime' && value === currentTarget.rime) {
+            isCorrect = true;
+        }
+
+        if (isCorrect) {
+            state.score += 1; 
+            slotAnswers[type] = true;
+            
+            const slotEl = document.getElementById(`slot-${type}`);
+            slotEl.innerText = value;
+            slotEl.classList.add('glow-success', 'pop-effect');
+            AudioEngine.playDing();
+            
+            tileEl.remove();
+
+            triggerFeedbackDisplay(true, "Excellent!");
+            checkFullWordCompletion();
+        } else {
+            state.score = Math.max(0, state.score - 1); 
+            state.wrongAttempts++;
+            AudioEngine.playError();
+            
+            const elementToShake = document.getElementById(`slot-${type}`);
+            elementToShake.classList.add('shake');
+            setTimeout(() => elementToShake.classList.remove('shake'), 400);
+
+            triggerFeedbackDisplay(false, "Try Again!");
+        }
+        updateHUD();
+        localStorage.setItem('cvc_train_score', state.score);
+    }
+
+    function triggerFeedbackDisplay(isSuccess, textMsg) {
+        const overlay = document.getElementById('feedback-overlay');
+        overlay.innerText = textMsg;
+        overlay.className = `feedback-text ${isSuccess ? 'correct' : 'incorrect'}`;
+        overlay.style.display = 'block';
+        setTimeout(() => { overlay.style.display = 'none'; }, 800);
+    }
+
+    function checkFullWordCompletion() {
+        if (slotAnswers.onset && slotAnswers.rime) {
+            state.score += 1; 
+            state.completedCount++;
+            updateHUD();
+            
+            const starEl = document.getElementById('star-reward-el');
+            starEl.classList.add('star-active');
+            AudioEngine.playStarChime();
+            
+            document.getElementById('btn-next-coach').style.display = 'inline-block';
+        }
+    }
+
+    function advanceNextCoach() {
+        const track = document.getElementById('train-track');
+        track.classList.add('exit'); // FIXED: Adds exit class to slide forward offscreen left cleanly
+
+        setTimeout(() => {
+            state.currentWordIndex++;
+            if (state.currentWordIndex >= state.activePool.length) {
+                concludeSessionShowWinScreen();
+            } else {
+                loadCurrentTargetWord();
+                updateHUD();
+            }
+        }, 1000);
+    }
+
+    function concludeSessionShowWinScreen() {
+        showScreen('screen-win');
+        document.getElementById('stat-score').innerText = state.score;
+        document.getElementById('stat-words').innerText = state.activePool.length;
+        
+        let totalHits = state.activePool.length * 2; 
+        let totalSystemInputs = totalHits + state.wrongAttempts;
+        let finalAccuracy = 100;
+        if (totalSystemInputs > 0) {
+            finalAccuracy = Math.round((totalHits / totalSystemInputs) * 100);
+        }
+        
+        document.getElementById('stat-accuracy').innerText = `${finalAccuracy}%`;
+    }
+</script>
+
+</body>
+</html>
